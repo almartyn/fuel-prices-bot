@@ -32,6 +32,7 @@ if (/\bsrc\/index\.js\b/.test(command) && !/\bDRY_RUN=(true|1)\b/.test(command))
 
 respond({ permission: 'allow' });
 
+/** @param {string} why */
 function ask(why) {
   respond({
     permission: 'ask',
@@ -40,6 +41,7 @@ function ask(why) {
   });
 }
 
+/** @param {{ permission: 'allow' | 'ask' | 'deny', user_message?: string, agent_message?: string }} payload */
 function respond(payload) {
   process.stdout.write(JSON.stringify(payload));
   process.exit(0);

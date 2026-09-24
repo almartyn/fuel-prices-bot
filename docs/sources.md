@@ -32,7 +32,8 @@ export default {
   id: 'okko',
   name: 'OKKO',
   url: 'https://www.okko.ua/...',
-  async fetchPrices() {
+  async fetchPrices({ http }) {
+    // http — таймаут і кількість спроб з конфігу, передати в getJson / getText з src/utils/http.js
     // завантажити сторінку, розібрати, повернути масив
     return [
       { rawName: 'А-95', price: 56.99 },

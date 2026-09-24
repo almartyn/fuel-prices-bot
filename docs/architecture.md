@@ -59,7 +59,9 @@
 | `src/telegram/formatter.js` | Будує текст поста з результатів порівняння. |
 | `src/telegram/client.js` | Надсилає повідомлення через Bot API. |
 | `src/utils/http.js` | `fetch` з таймаутом, повторами і заголовками. |
-| `src/utils/logger.js` | Простий логер з рівнями `info` / `warn` / `error`. |
+| `src/utils/logger.js` | Простий логер з рівнями `debug` / `info` / `warn` / `error`, пише в `stderr`. |
+| `src/utils/date.js` | Дата `YYYY-MM-DD` у заданому часовому поясі (київська дата для постів і файлів). |
+| `src/types.js` | Спільні JSDoc-типи: `Source`, `Snapshot`, `Comparison` тощо. Коду не містить. |
 
 ## Структура папок
 
@@ -92,13 +94,19 @@ fuel-prices-bot/
 │   ├── telegram/
 │   │   ├── client.js
 │   │   └── formatter.js
+│   ├── types.js                 # спільні JSDoc-типи
 │   └── utils/
+│       ├── date.js
+│       ├── errors.js
 │       ├── http.js
 │       └── logger.js
 ├── test/
-│   ├── fixtures/                # збережені HTML-сторінки для тестів парсерів
-│   │   ├── okko.html
+│   ├── setup.js                 # вимикає мережу в тестах
+│   ├── helpers/fakes.js         # підробки джерел, сховища, Telegram
+│   ├── fixtures/                # збережені відповіді сайтів для тестів парсерів
+│   │   ├── okko.json
 │   │   └── ...
+│   ├── index.test.js
 │   ├── sources.test.js
 │   ├── compare.test.js
 │   └── formatter.test.js
@@ -110,11 +118,13 @@ fuel-prices-bot/
 
 ## Основні кроки `index.js` (псевдокод)
 
+У коді ця послідовність — функція `run()`, яка отримує всі залежності (конфіг, джерела, сховище, Telegram-клієнт, годинник) параметрами. Завдяки цьому `test/index.test.js` перевіряє порядок кроків і реакцію на збої без мережі й файлів. Dry-run не зупиняється через сьогоднішній `postedDate`, бо нічого не публікує.
+
 ```js
 const config = loadConfig();
 const previous = await store.readLatest();          // може бути null при першому запуску
 
-if (!config.force && previous?.postedDate === today()) {
+if (!config.force && !config.dryRun && previous?.postedDate === today()) {
   log.info('Сьогодні вже публікували, пропускаю');
   return;
 }

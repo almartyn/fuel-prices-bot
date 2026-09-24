@@ -15,6 +15,7 @@ if (/^\.env(\..+)?$/.test(name) && name !== '.env.example') {
 
 respond({ permission: 'allow' });
 
+/** @param {{ permission: 'allow' | 'deny', user_message?: string }} payload */
 function respond(payload) {
   process.stdout.write(JSON.stringify(payload));
   process.exit(0);

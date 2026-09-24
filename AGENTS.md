@@ -2,7 +2,7 @@
 
 Telegram bot that once a day scrapes fuel prices from Ukrainian gas station chains (OKKO, WOG, UPG, SOCAR), compares them with the previous snapshot and posts the result to a Telegram channel. Runs as a one-shot Node.js script on a GitHub Actions schedule; snapshots are stored as JSON in `data/` and committed to the repo.
 
-**Status: design phase.** Only `docs/` exists; no code yet. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
+**Status: skeleton.** The pipeline in `src/index.js` runs end to end, but normalize, validate, compare, the formatter, the Telegram client and the JSON store are stubs, and no source is registered yet. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
 
 ## Where to look
 
@@ -21,11 +21,12 @@ The design lives in `docs/` (written in Ukrainian). Read the relevant file befor
 
 ## Commands
 
-Node.js 24 (`nvm use`, version pinned in `.nvmrc`). The commands below appear with the project skeleton (roadmap stage 1):
+Node.js 24 (`nvm use`, version pinned in `.nvmrc`).
 
-- `npm test` — `node:test`, offline, fixtures only.
-- `npm run lint` — ESLint.
-- `npm run dry-run` — collect prices and print the post; publishes and saves nothing.
+- `npm run check` — lint + typecheck + tests. Must pass before you finish; a `stop` hook runs it and sends failures back to you.
+- `npm test` — `node:test`, offline: `test/setup.js` makes global `fetch` throw. Inject a fake `fetch` (see `test/http.test.js`) and reuse fakes from `test/helpers/fakes.js`.
+- `npm run typecheck` — `tsc` over JSDoc annotations. New code needs JSDoc types; shared types live in `src/types.js`, imported with `/** @import { … } from '…' */`.
+- `npm run dry-run` — collect prices and print the post to stdout (logs go to stderr); publishes and saves nothing.
 - `SOURCES=okko npm run dry-run` — same, for one source.
 
 ## Invariants
@@ -52,10 +53,11 @@ Do not break these without explicitly discussing it first:
 ## Language
 
 - `docs/` and the Telegram post: Ukrainian.
-- Code, identifiers, code comments, commit messages, `AGENTS.md`, Cursor rules and skills: English.
+- Admin notification headings: Ukrainian (they go to Telegram).
+- Code, identifiers, code comments, log and error messages, commit messages, `AGENTS.md`, Cursor rules and skills: English.
 
 ## Definition of done
 
-1. Lint and tests pass (once they exist).
+1. `npm run check` passes.
 2. `npm run dry-run` prints a correct post for the affected sources.
 3. Docs are updated when behavior changes: `docs/sources.md` for sources, `docs/roadmap.md` checkboxes for finished steps.

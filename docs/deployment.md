@@ -40,9 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -68,7 +68,7 @@ jobs:
           git push
 ```
 
-Версії actions (`@v4`) і Node.js варто перевірити на момент реалізації й оновити до актуальних.
+Версії actions актуальні на вересень 2026 (`@v7`), Node.js береться з `.nvmrc`. Надалі оновлення actions пропонує Dependabot (`.github/dependabot.yml`).
 
 ## Розклад і часові пояси
 

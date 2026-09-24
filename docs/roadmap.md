@@ -10,10 +10,11 @@
 
 ## Етап 1. Каркас проєкту
 
-- [ ] `package.json`, `.gitignore`, `.env.example`.
-- [ ] `config.js` з перевіркою змінних.
-- [ ] `logger.js`, `http.js` з таймаутом і повторами.
-- [ ] Порожній `index.js`, що проходить усі кроки з заглушками.
+- [x] `package.json`, `.gitignore`, `.env.example`.
+- [x] `config.js` з перевіркою змінних.
+- [x] `logger.js`, `http.js` з таймаутом і повторами.
+- [x] Порожній `index.js`, що проходить усі кроки з заглушками.
+- [x] ESLint, перевірка типів JSDoc, `npm run check`, CI, Dependabot.
 
 
 

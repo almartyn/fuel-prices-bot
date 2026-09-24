@@ -2,7 +2,7 @@
 
 ## Вимоги
 
-- Node.js 24 LTS або новіший (`node -v`). Потрібні вбудовані `fetch`, `node:test` і прапорець `--env-file`. Версія зафіксована в `.nvmrc`, тож достатньо `nvm use`.
+- Node.js 24 LTS або новіший (`node -v`). Потрібні вбудовані `fetch`, `node:test` і прапорець `--env-file-if-exists`. Версія зафіксована в `.nvmrc`, тож достатньо `nvm use`.
 - npm (йде разом з Node.js).
 - Git.
 
@@ -20,13 +20,17 @@ cp .env.example .env
   "type": "module",
   "engines": { "node": ">=24" },
   "scripts": {
-    "start": "node --env-file=.env src/index.js",
-    "dry-run": "DRY_RUN=true node --env-file=.env src/index.js",
-    "test": "node --test",
-    "lint": "eslint ."
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "dry-run": "DRY_RUN=true node --env-file-if-exists=.env src/index.js",
+    "test": "node --import ./test/setup.js --test 'test/**/*.test.js' '.cursor/hooks/*.test.mjs'",
+    "lint": "eslint .",
+    "typecheck": "tsc",
+    "check": "npm run lint && npm run typecheck && npm test"
   }
 }
 ```
+
+`--env-file-if-exists` читає `.env`, якщо він є, і не падає без нього — так dry-run працює і в CI.
 
 | Команда | Що робить |
 |---|---|
@@ -34,6 +38,10 @@ cp .env.example .env
 | `SOURCES=okko npm run dry-run` | Те саме, але лише для одного джерела. |
 | `npm start` | Повний запуск: публікація і збереження знімка. |
 | `npm test` | Запуск тестів. |
+| `npm run typecheck` | Перевірка типів за JSDoc-анотаціями (`tsc` з `checkJs`, без компіляції). |
+| `npm run check` | Лінтер, типи і тести разом. Те саме запускає CI (`.github/workflows/ci.yml`) і хук Cursor після кожної відповіді агента. |
+
+Пост друкується в `stdout`, логи — у `stderr`, тож `npm run dry-run > post.txt` зберігає лише текст поста.
 
 ## Залежності
 
@@ -41,15 +49,16 @@ cp .env.example .env
 
 | Пакет | Навіщо |
 |---|---|
-| `cheerio` | Розбір HTML і пошук за CSS-селекторами |
+| `cheerio` | Розбір HTML за CSS-селекторами. Поточним чотирьом джерелам не потрібен (усі віддають JSON), додаємо, лише якщо з'явиться джерело з розбором HTML |
 | `playwright` | Лише якщо якесь джерело вимагає виконання JavaScript |
-| `eslint` (dev) | Перевірка стилю коду |
+| `eslint`, `@eslint/js`, `globals` (dev) | Перевірка стилю коду |
+| `typescript`, `@types/node` (dev) | Перевірка типів JSDoc. Код лишається на JavaScript |
 
 Для HTTP, Telegram, тестів і `.env` вистачає можливостей Node.js.
 
 ## Тести
 
-Тести не звертаються до реальних сайтів і Telegram — вони працюють на збережених даних.
+Тести не звертаються до реальних сайтів і Telegram — вони працюють на збережених даних. Це гарантує `test/setup.js`: він підміняє глобальний `fetch` на такий, що завжди кидає помилку. Код, який ходить у мережу, приймає `fetch` параметром, і тест передає підробку. Спільні підробки (джерело, сховище, Telegram, логер, конфіг) — у `test/helpers/fakes.js`.
 
 | Що тестуємо | Як |
 |---|---|
@@ -84,6 +93,8 @@ cp .env.example .env
 ```
 node_modules/
 .env
+.env.*
+!.env.example
 *.log
 ```
 

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+/** @param {string} script @param {object} input @returns {string} */
 const run = (script, input) =>
   JSON.parse(
     execFileSync(process.execPath, [fileURLToPath(new URL(script, import.meta.url))], {
