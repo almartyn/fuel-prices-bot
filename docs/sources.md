@@ -62,7 +62,7 @@ export default {
 | `a95_premium` | А-95+ | OKKO `Pulls 95`, WOG `95 Mustang Євро5-Е10`, UPG `upg95`, SOCAR `NANO 95` |
 | `a100` | А-100 | OKKO `Pulls 100`, WOG `100 Mustang Євро5-Е0`, UPG `upg100`, SOCAR `NANO 100` |
 | `diesel` | ДП | OKKO `DP`, WOG `ДП Євро5`, UPG `EURO DIESEL` (у SOCAR звичайного ДП на сайті немає) |
-| `diesel_premium` | ДП+ | OKKO `Pulls Diesel`, WOG `ДП Mustang+`, UPG `upgDIESEL`, SOCAR `NANO ДП` |
+| `diesel_premium` | ДП+ | OKKO `Pulls Diesel`, WOG `ДП Mustang+`, UPG `upgDIESEL`, SOCAR `DIESEL NANO Extro` |
 | `lpg` | Газ | OKKO `SPBT`, WOG `ГАЗ`, UPG `Газ`, SOCAR `LPG` |
 
 Назви вказано точно так, як їх має повертати парсер у `rawName` (див. нотатки по кожному джерелу). Усі мережі публікують ще й AdBlue: це не пальне, тому в словнику воно позначається як явно ігнороване (`null`) і пропускається без попередження в лог.
@@ -127,5 +127,5 @@ const FUEL_MAP = {
 - Назви: `Бензин А-95`, `NANO 95`, `NANO 100`, `NANO ДП`, `DIESEL NANO Extro`, `LPG`, `AdBlue`.
 - Особливості:
   - Найменш надійне джерело: ціни — маркетинговий текст CMS з приміткою «Ціни можуть змінюватись. Актуальні ціни – на АЗК SOCAR», точність іноді до гривні (`104`), дати оновлення немає.
-  - Звичайного ДП на сайті немає, лише преміальні `NANO ДП` і `DIESEL NANO Extro`. `NANO ДП` зводимо до `diesel_premium`; для `DIESEL NANO Extro` окремого коду поки немає — пропускаємо (`null`), поки не вирішимо інакше.
+  - Звичайного ДП на сайті немає, лише преміальні `NANO ДП` і `DIESEL NANO Extro`. `DIESEL NANO Extro` зводимо до `diesel_premium` (ДП+), а `NANO ДП` пропускаємо (`null`): окремого коду для другого преміального дизеля немає.
   - Карта АЗС (`/map`) цін не містить.
