@@ -2,7 +2,7 @@
 
 ## Вимоги
 
-- Node.js 22 LTS або новіший (`node -v`). Потрібні вбудовані `fetch`, `node:test` і прапорець `--env-file`.
+- Node.js 24 LTS або новіший (`node -v`). Потрібні вбудовані `fetch`, `node:test` і прапорець `--env-file`. Версія зафіксована в `.nvmrc`, тож достатньо `nvm use`.
 - npm (йде разом з Node.js).
 - Git.
 
@@ -18,7 +18,7 @@ cp .env.example .env
 ```json
 {
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": { "node": ">=24" },
   "scripts": {
     "start": "node --env-file=.env src/index.js",
     "dry-run": "DRY_RUN=true node --env-file=.env src/index.js",
