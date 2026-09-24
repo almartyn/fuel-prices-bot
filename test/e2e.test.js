@@ -37,6 +37,34 @@ test('offline dry-run of every registered source produces the golden post', asyn
   await assertGolden('dry-run.txt', `${printed[0]}\n`);
 });
 
+test('one source down: the others are posted, the failure is named and reported', async () => {
+  /** @type {typeof fetch} */
+  const socarDown = async (input, init) => {
+    if (String(input).startsWith('https://socar.ua/')) throw Object.assign(new TypeError('fetch failed'), { cause: { code: 'ECONNREFUSED' } });
+    return fixtureFetch(input, init);
+  };
+  const { telegram, sent } = fakeTelegram();
+  const { store, saved } = fakeStore();
+  const exitCode = await run({
+    config: testConfig({ HTTP_RETRIES: '1' }),
+    log: fakeLogger().log,
+    sources: [...allSources],
+    store,
+    telegram,
+    output: () => {},
+    now: () => new Date('2026-09-24T06:17:00Z'),
+    fetch: socarDown,
+  });
+  assert.equal(exitCode, 0);
+  const [post, notice] = sent;
+  assert.equal(post.chatId, '@test_channel');
+  assert.deepEqual([...post.text.matchAll(/<b>(\w+)<\/b>/g)].map((match) => match[1]), ['OKKO', 'WOG', 'UPG']);
+  assert.match(post.text, /⚠️ Не вдалося отримати дані: SOCAR/);
+  assert.equal(notice.chatId, '42');
+  assert.match(notice.text, /SOCAR: .*fetch failed/);
+  assert.deepEqual(saved[0].failedSources, ['socar']);
+});
+
 test('two daily runs on the JSON store: the second post compares with the first', async (t) => {
   const dir = await mkdtemp(path.join(tmpdir(), 'fuel-prices-bot-e2e-'));
   t.after(() => rm(dir, { recursive: true, force: true }));

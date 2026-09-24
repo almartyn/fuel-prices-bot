@@ -1,4 +1,7 @@
 import { ConfigError } from '../config.js';
+import okko from './okko.js';
+import socar from './socar.js';
+import upg from './upg.js';
 import wog from './wog.js';
 
 /** @import { Source } from '../types.js' */
@@ -8,7 +11,7 @@ import wog from './wog.js';
  *
  * @type {readonly Source[]}
  */
-export const allSources = [wog];
+export const allSources = [okko, wog, upg, socar];
 
 /**
  * @param {string[] | null} ids  null selects every source
