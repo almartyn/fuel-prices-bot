@@ -11,6 +11,7 @@ describe('loadConfig', () => {
     assert.deepEqual(config, {
       telegram: { botToken: '123:secret', channelId: '@chan', adminChatId: null },
       dryRun: false,
+      offline: false,
       force: false,
       sources: null,
       validation: { priceMin: 20, priceMax: 200, maxDailyChangePct: 15 },
@@ -76,6 +77,11 @@ describe('loadConfig', () => {
       });
     });
   }
+
+  test('allows OFFLINE only together with DRY_RUN', () => {
+    assert.equal(loadConfig({ DRY_RUN: 'true', OFFLINE: 'true' }).offline, true);
+    assert.throws(() => loadConfig({ ...required, OFFLINE: 'true' }), /OFFLINE=true requires DRY_RUN=true/);
+  });
 
   test('rejects PRICE_MIN not below PRICE_MAX', () => {
     assert.throws(() => loadConfig({ ...required, PRICE_MIN: '100', PRICE_MAX: '50' }), ConfigError);

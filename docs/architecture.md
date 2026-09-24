@@ -52,6 +52,8 @@
 | `src/sources/*.js` | Парсер для кожної мережі. Експортує `id`, `name`, `url` і функцію `fetchPrices()`. |
 | `src/sources/index.js` | Реєстр усіх джерел. |
 | `src/core/collect.js` | Запускає всі парсери паралельно, збирає результати й помилки. |
+| `src/core/fuels.js` | Коди пального, їхній порядок у пості, підписи і словник `FUEL_MAP` для кожного джерела. |
+| `src/core/money.js` | Переведення гривень у копійки для порівнянь. |
 | `src/core/normalize.js` | Перетворює назви пального з сайтів на єдині коди. |
 | `src/core/validate.js` | Перевіряє ціни на адекватність. |
 | `src/core/compare.js` | Рахує різницю з попереднім знімком. |
@@ -60,6 +62,8 @@
 | `src/telegram/client.js` | Надсилає повідомлення через Bot API. |
 | `src/utils/http.js` | `fetch` з таймаутом, повторами і заголовками. |
 | `src/utils/logger.js` | Простий логер з рівнями `debug` / `info` / `warn` / `error`, пише в `stderr`. |
+| `src/utils/fixtureFetch.js` | Підміна `fetch`, що відповідає збереженими фікстурами (`OFFLINE=true`, наскрізний тест). |
+| `scripts/update-fixtures.js` | Оновлення фікстур з живих сайтів (`npm run fixtures:update`). |
 | `src/utils/date.js` | Дата `YYYY-MM-DD` у заданому часовому поясі (київська дата для постів і файлів). |
 | `src/types.js` | Спільні JSDoc-типи: `Source`, `Snapshot`, `Comparison` тощо. Коду не містить. |
 

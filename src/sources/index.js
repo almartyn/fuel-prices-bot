@@ -1,13 +1,14 @@
 import { ConfigError } from '../config.js';
+import wog from './wog.js';
 
 /** @import { Source } from '../types.js' */
 
 /**
- * Order here is the order of chains in the post.
+ * Order here is the order of chains in the post: OKKO, WOG, UPG, SOCAR.
  *
  * @type {readonly Source[]}
  */
-export const allSources = [];
+export const allSources = [wog];
 
 /**
  * @param {string[] | null} ids  null selects every source

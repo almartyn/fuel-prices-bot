@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { ConfigError, loadConfig } from './config.js';
 import { collectAll } from './core/collect.js';
 import { compare } from './core/compare.js';
@@ -9,6 +11,7 @@ import { createTelegramClient } from './telegram/client.js';
 import { formatAdminNotice, formatPost } from './telegram/formatter.js';
 import { localDate } from './utils/date.js';
 import { errorMessage } from './utils/errors.js';
+import { createFixtureFetch } from './utils/fixtureFetch.js';
 import { createLogger } from './utils/logger.js';
 
 /** @import { Config } from './config.js' */
@@ -20,6 +23,8 @@ import { createLogger } from './utils/logger.js';
 
 export const SCHEMA_VERSION = 1;
 
+const FIXTURES_DIR = fileURLToPath(new URL('../test/fixtures/', import.meta.url));
+
 /**
  * @typedef {object} RunDeps
  * @property {Readonly<Config>} config
@@ -29,6 +34,7 @@ export const SCHEMA_VERSION = 1;
  * @property {TelegramClient} telegram
  * @property {(text: string) => void} output  receives the post in dry-run mode
  * @property {() => Date} [now]
+ * @property {typeof fetch} [fetch]  replaces the network for every source
  */
 
 /**
@@ -38,7 +44,7 @@ export const SCHEMA_VERSION = 1;
  * @param {RunDeps} deps
  * @returns {Promise<number>} process exit code
  */
-export async function run({ config, log, sources, store, telegram, output, now = () => new Date() }) {
+export async function run({ config, log, sources, store, telegram, output, now = () => new Date(), fetch }) {
   const startedAt = now();
   const today = localDate(startedAt, config.timeZone);
   /** @type {string[]} */
@@ -58,8 +64,21 @@ export async function run({ config, log, sources, store, telegram, output, now =
     return 0;
   }
 
-  const { results, errors } = await collectAll(sources, { http: config.http }, log);
-  const { stations, rejected } = validate(normalize(results, log), previous, config.validation);
+  const http = fetch ? { ...config.http, fetch } : config.http;
+  const { results, errors } = await collectAll(sources, { http }, log);
+  const validated = validate(normalize(results, log), previous, config.validation);
+  const rejected = validated.rejected;
+  const stations = [];
+  for (const station of validated.stations) {
+    if (Object.keys(station.prices).length) {
+      stations.push(station);
+      continue;
+    }
+    const source = /** @type {Source} */ (sources.find(({ id }) => id === station.id));
+    const error = new Error('no usable prices left after normalization and validation');
+    log.warn(`${source.id}: ${error.message}`);
+    errors.push({ source, error });
+  }
 
   /** @type {Snapshot} */
   const snapshot = {
@@ -84,7 +103,7 @@ export async function run({ config, log, sources, store, telegram, output, now =
     return 1;
   }
 
-  const text = formatPost(compare(previous, snapshot), errors);
+  const text = formatPost({ comparison: compare(previous, snapshot), errors, sources });
 
   if (config.dryRun) {
     output(text);
@@ -155,6 +174,7 @@ async function main() {
       store: createJsonStore({ dir: 'data' }),
       telegram: createTelegramClient({ botToken: config.telegram.botToken }),
       output: (text) => process.stdout.write(`${text}\n`),
+      fetch: config.offline ? createFixtureFetch(FIXTURES_DIR) : undefined,
     });
   } catch (error) {
     log.error(error instanceof Error ? (error.stack ?? error.message) : String(error));

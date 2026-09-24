@@ -1,0 +1,22 @@
+---
+description: How tests, fixtures and golden files work in test/
+globs: test/**
+alwaysApply: false
+---
+
+# Tests
+
+- `node:test` + `node:assert/strict` only. Files are `test/<module>.test.js`; run everything with `npm run check`.
+- No network: `test/setup.js` makes global `fetch` throw. Inject a fake instead (`fakeFetch` in `test/http.test.js`, `createFixtureFetch` for saved responses).
+- Reuse `test/helpers/fakes.js` (`testConfig`, `fakeLogger`, `fakeSource`, `fakeStore`, `fakeTelegram`) rather than hand-rolling doubles.
+- Fix time with the `now` option of `run()`; pick instants that cross the Kyiv/UTC date boundary when dates matter.
+
+## Fixtures (`test/fixtures/`)
+
+- Raw site responses, byte for byte. Never edit them by hand; refresh with `npm run fixtures:update -- <id>` (needs network).
+- `manifest.json` maps each source id to its URL and file; `OFFLINE=true` and `test/e2e.test.js` answer HTTP from it.
+
+## Golden files (`test/golden/`)
+
+- `dry-run.txt` is the expected offline post of all registered sources. It is a spec: when it changes, the change must be intended.
+- Update with `UPDATE_GOLDEN=1 npm test`, then read `git diff test/golden/` and tell the user what changed and why. Never update it just to make a failing test pass.

@@ -10,6 +10,8 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/index.js",
     "dry-run": "DRY_RUN=true node --env-file-if-exists=.env src/index.js",
+    "dry-run:offline": "DRY_RUN=true OFFLINE=true node src/index.js",
+    "fixtures:update": "node scripts/update-fixtures.js",
     "test": "node --import ./test/setup.js --test 'test/**/*.test.js' '.cursor/hooks/*.test.mjs'",
     "lint": "eslint .",
     "typecheck": "tsc",

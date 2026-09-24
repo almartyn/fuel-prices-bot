@@ -1,0 +1,30 @@
+---
+description: Contract and conventions for fuel price parsers in src/sources
+globs: src/sources/**
+alwaysApply: false
+---
+
+# Fuel price parsers
+
+Each `src/sources/<id>.js` default-exports a `Source` (see `src/types.js`) and also exports a pure `parse(body)`. Model: `src/sources/wog.js`. To add a source, follow the `add-fuel-source` skill; to repair one, `fix-broken-parser`.
+
+```js
+/** @type {Source} */
+export default {
+  id: 'wog',                       // lowercase, same key in FUEL_MAP and test/fixtures/manifest.json
+  name: 'WOG',                     // shown in the post
+  url: 'https://wog.ua/ua/fuels/', // page for humans; its host goes to the "Джерела" line
+  async fetchPrices({ http }) {
+    return parse(await getJson(API_URL, http)); // always pass `http` through: it carries timeouts and offline fetch
+  },
+};
+export function parse(body) { /* pure: no I/O, no logging */ }
+```
+
+- `parse` returns `{ rawName, price }[]`: `rawName` exactly as the site writes it (never translate or tidy it), `price` in UAH per liter as a number.
+- Throw an `Error` naming the missing path when the shape is unexpected (`'data.fuel_filters is missing or empty'`). Never return `[]` or guess.
+- Do not prefix messages with the source name; `collect.js` adds it.
+- Fetch through `getJson` / `getText` from `src/utils/http.js` only, one request per run. No new dependencies.
+- The API URL must equal the `url` of the source's entry in `test/fixtures/manifest.json`, or offline runs break.
+- Registry order in `src/sources/index.js` is the order in the post: OKKO, WOG, UPG, SOCAR.
+- Findings about a site (URL, JSON path, quirks) belong in `docs/sources.md` (Ukrainian).

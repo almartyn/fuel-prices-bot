@@ -2,7 +2,7 @@
 
 Telegram bot that once a day scrapes fuel prices from Ukrainian gas station chains (OKKO, WOG, UPG, SOCAR), compares them with the previous snapshot and posts the result to a Telegram channel. Runs as a one-shot Node.js script on a GitHub Actions schedule; snapshots are stored as JSON in `data/` and committed to the repo.
 
-**Status: skeleton.** The pipeline in `src/index.js` runs end to end, but normalize, validate, compare, the formatter, the Telegram client and the JSON store are stubs, and no source is registered yet. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
+**Status: one source.** WOG is implemented end to end (fetch → normalize → validate → post). Compare, the Telegram client, admin notices and the JSON store are still stubs; OKKO, UPG and SOCAR are researched (fuel maps ready) but not implemented. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
 
 ## Where to look
 
@@ -28,6 +28,14 @@ Node.js 24 (`nvm use`, version pinned in `.nvmrc`).
 - `npm run typecheck` — `tsc` over JSDoc annotations. New code needs JSDoc types; shared types live in `src/types.js`, imported with `/** @import { … } from '…' */`.
 - `npm run dry-run` — collect prices and print the post to stdout (logs go to stderr); publishes and saves nothing.
 - `SOURCES=okko npm run dry-run` — same, for one source.
+- `npm run dry-run:offline` — same without network, answered from `test/fixtures/` (works in the sandbox).
+- `npm run fixtures:update -- <id>` — re-download a source's saved response (network).
+- `UPDATE_GOLDEN=1 npm test` — rewrite `test/golden/dry-run.txt`; review the diff, it is the spec of the post.
+
+## Skills and rules
+
+- `.cursor/skills/`: `research-source` (study a site), `add-fuel-source` (implement a parser), `fix-broken-parser` (site changed).
+- `.cursor/rules/`: conventions that load with `src/sources/**`, `src/core/**`, `src/telegram/**` and `test/**`.
 
 ## Invariants
 
@@ -36,7 +44,7 @@ Do not break these without explicitly discussing it first:
 - **Wrong prices are worse than no post.** Suspicious data is dropped, never published.
 - **The snapshot is saved only after a successful publish.** Otherwise the next run compares against the wrong day.
 - **A parser throws on failure** (page not loaded, selectors not found). It never returns an empty array.
-- **Parsers return raw names** (`rawName`); mapping to fuel codes happens only in `src/core/normalize.js`.
+- **Parsers return raw names** (`rawName`); mapping to fuel codes happens only in `src/core/normalize.js`, using `FUEL_MAP` from `src/core/fuels.js`.
 - **Sources are isolated**: run through `Promise.allSettled`; one failing source must not stop the others.
 - **Money is compared in kopecks** (`Math.round(price * 100)`), converted to UAH only for display.
 - **Side effects live only in** `sources/*.fetchPrices`, `storage/`, `telegram/client.js` and `index.js`. Everything else (`parse`, `normalize`, `validate`, `compare`, `formatPost`) is a pure function.

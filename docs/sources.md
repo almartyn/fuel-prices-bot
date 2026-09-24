@@ -5,7 +5,7 @@
 | Мережа | Сайт | Спосіб отримання | Статус |
 |---|---|---|---|
 | OKKO | https://www.okko.ua | внутрішній JSON API | досліджено, не реалізовано |
-| WOG | https://wog.ua | внутрішній JSON API | досліджено, не реалізовано |
+| WOG | https://wog.ua | внутрішній JSON API | реалізовано (`src/sources/wog.js`) |
 | UPG | https://upg.ua | JSON у `<script>` | досліджено, не реалізовано |
 | SOCAR | https://socar.ua | внутрішній JSON API, ціна текстом | досліджено, не реалізовано |
 
@@ -71,8 +71,8 @@ export default {
 Реалізація — словник відповідностей для кожного джерела окремо, бо одна й та сама назва в різних мережах може означати різне:
 
 ```js
-// src/core/normalize.js
-const FUEL_MAP = {
+// src/core/fuels.js (використовується в src/core/normalize.js)
+export const FUEL_MAP = {
   okko: { 'A-95': 'a95', 'Pulls 95': 'a95_premium', 'DP': 'diesel', AdBlue: null, /* ... */ },
   wog:  { '95 Євро5-Е10': 'a95', '95 Mustang Євро5-Е10': 'a95_premium', AdBlue: null, /* ... */ },
 };
@@ -94,7 +94,7 @@ const FUEL_MAP = {
 ### OKKO
 - URL сторінки з цінами: https://www.okko.ua/fuels
 - Спосіб отримання: внутрішній JSON API, яким користується сам сайт (Nuxt): `GET https://www.okko.ua/api/uk/fuels`. Фікстура: `test/fixtures/okko.json`.
-- Шлях у JSON: `data.layout[]` → елемент з `componentName: "Global_BulletsFuel"` → `data.bullets.items[]`. У кожному елементі: `fuel_code` (стабільний код, його беремо як `rawName`), `price` (рядок `"92.90"`), `title` і `type` (`euro` / `pulls`) — лише для відображення.
+- Шлях у JSON: `data.layout[]` → елемент, у якого `data.bullets.componentName === "Global_BulletsFuel"` (сам елемент зветься `FuelBaner`) → `data.bullets.items[]`. У кожному елементі: `fuel_code` (стабільний код, його беремо як `rawName`), `price` (рядок `"92.90"`), `title` і `type` (`euro` / `pulls`) — лише для відображення.
 - Коди: `A-95`, `Pulls 95`, `Pulls 100`, `DP`, `Pulls Diesel`, `SPBT` (газ), `AdBlue`.
 - Особливості:
   - Та сама таблиця вбудована в HTML сторінок `/fuels` і головної у `window.__NUXT__`, але в стиснутому вигляді (значення підставляються через аргументи функції), тож API простіший.

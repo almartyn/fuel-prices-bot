@@ -12,7 +12,7 @@
 
 /**
  * @typedef {object} SourceContext
- * @property {HttpSettings} http
+ * @property {HttpSettings & { fetch?: typeof fetch }} http  pass as is to getJson / getText
  */
 
 /**

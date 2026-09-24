@@ -31,3 +31,6 @@ jobs:
       - run: npm run typecheck
 
       - run: npm test
+
+      - name: Offline dry-run through the CLI
+        run: npm run dry-run:offline

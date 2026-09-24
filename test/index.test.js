@@ -11,7 +11,7 @@ const NOW = new Date('2026-09-23T22:30:00Z');
 const KYIV_TODAY = '2026-09-24';
 
 const okko = fakeSource('okko', [{ rawName: 'A-95', price: 92.9 }]);
-const wog = fakeSource('wog', [{ rawName: 'A-95', price: 92.9 }]);
+const wog = fakeSource('wog', [{ rawName: '95 Євро5-Е10', price: 92.9 }]);
 const broken = fakeSource('upg', new Error('HTTP 503 (3 attempts)'));
 
 /** @type {Snapshot} */
@@ -96,6 +96,16 @@ describe('run', () => {
     assert.deepEqual(saved[0].failedSources, ['upg']);
     assert.equal(toAdmin.length, 1);
     assert.match(toAdmin[0].text, /UPG: HTTP 503/);
+  });
+
+  test('a source whose prices are all unknown or implausible counts as failed', async () => {
+    const junk = fakeSource('upg', [{ rawName: 'Unknown 98', price: 90 }, { rawName: 'A-95', price: 5.69 }]);
+    const { exitCode, saved, toChannel, toAdmin } = await runWith({ sources: [okko, junk] });
+    assert.equal(exitCode, 0);
+    assert.deepEqual(saved[0].failedSources, ['upg']);
+    assert.match(toChannel[0].text, /Не вдалося отримати дані: UPG/);
+    assert.match(toAdmin[0].text, /UPG: no usable prices left/);
+    assert.match(toAdmin[0].text, /upg a95: 5\.69 \(outside 20–200 UAH\)/);
   });
 
   test('posts nothing and fails when every source fails', async () => {

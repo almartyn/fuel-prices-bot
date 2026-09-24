@@ -1,0 +1,22 @@
+---
+description: Pure data pipeline rules for src/core (normalize, validate, compare, fuels)
+globs: src/core/**
+alwaysApply: false
+---
+
+# Core pipeline
+
+- Functions here are pure: data in, data out. No `fetch`, files, `Date.now()`, `process.env` or Telegram. Pass the logger in when warnings are needed (`normalize(results, log)`).
+- Compare and subtract money in kopecks via `toKopecks` from `money.js`; convert to UAH only for display.
+
+```js
+// ❌ 56.99 - 56.69 === 0.30000000000000426
+const delta = price - previous;
+// ✅
+const delta = (toKopecks(price) - toKopecks(previous)) / 100;
+```
+
+- Fuel codes, their post order and labels live only in `fuels.js` (`FUEL_CODES`, `FUEL_LABELS`). Do not hardcode codes elsewhere.
+- `FUEL_MAP` keys must match the site byte for byte; watch Cyrillic/Latin look-alikes (`А`/`A`, `Е`/`E`). A `null` value means "known, deliberately skipped" (AdBlue); a missing key means "unknown, warn".
+- A suspicious price is dropped and reported through `rejected`, never corrected or rounded into plausibility.
+- Every behavior change needs a test in `test/<module>.test.js`; the scenarios to cover are listed in `docs/development.md` and `docs/storage-and-comparison.md`.

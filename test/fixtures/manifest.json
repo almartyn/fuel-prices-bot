@@ -1,0 +1,6 @@
+{
+  "okko": { "url": "https://www.okko.ua/api/uk/fuels", "file": "okko.json" },
+  "wog": { "url": "https://api.wog.ua/fuel_stations", "file": "wog.json" },
+  "upg": { "url": "https://upg.ua/cini-na-palne/", "file": "upg.html" },
+  "socar": { "url": "https://socar.ua/api/pages/fuel", "file": "socar.json" }
+}

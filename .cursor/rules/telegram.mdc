@@ -1,0 +1,14 @@
+---
+description: Telegram post formatting and Bot API rules for src/telegram
+globs: src/telegram/**
+alwaysApply: false
+---
+
+# Telegram
+
+- The post follows `docs/message-format.md` exactly; `test/formatter.test.js` pins that template. Change the doc and the test together, never only the code.
+- `parse_mode` is HTML. Escape every string that comes from a site with `escapeHtml` (`&`, `<`, `>`). Our own tags are `<b>`, `<i>`, `<code>` only.
+- Post text is Ukrainian. Dates are built from `YYYY-MM-DD` strings with the genitive month list (`23 вересня 2026`), not from `new Date()`.
+- Over 4096 characters: throw. Never truncate silently.
+- The bot token must not reach logs or error messages; `src/utils/http.js` redacts `/bot<token>/` in URLs, keep using it or `redactUrl`.
+- The agent never sends to Telegram itself: run `npm run dry-run`, `npm run dry-run:offline` or the tests with `fakeTelegram` from `test/helpers/fakes.js`.

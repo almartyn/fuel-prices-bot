@@ -8,6 +8,7 @@ import { LOG_LEVELS } from './utils/logger.js';
  * @property {{ botToken: string, channelId: string, adminChatId: string | null }} telegram
  *   botToken and channelId are empty strings only in dry-run mode.
  * @property {boolean} dryRun
+ * @property {boolean} offline  answer HTTP from test/fixtures instead of the network; dry-run only
  * @property {boolean} force
  * @property {string[] | null} sources  null means all sources
  * @property {{ priceMin: number, priceMax: number, maxDailyChangePct: number }} validation
@@ -55,6 +56,8 @@ export function loadConfig(env = process.env) {
   };
 
   const dryRun = bool('DRY_RUN', false);
+  const offline = bool('OFFLINE', false);
+  if (offline && !dryRun) problems.push('OFFLINE=true requires DRY_RUN=true');
   const botToken = text('TELEGRAM_BOT_TOKEN') ?? '';
   const channelId = text('TELEGRAM_CHANNEL_ID') ?? '';
   if (!dryRun) {
@@ -85,6 +88,7 @@ export function loadConfig(env = process.env) {
   const config = {
     telegram: { botToken, channelId, adminChatId: text('TELEGRAM_ADMIN_CHAT_ID') },
     dryRun,
+    offline,
     force: bool('FORCE', false),
     sources: sourceIds?.length ? sourceIds : null,
     validation: {

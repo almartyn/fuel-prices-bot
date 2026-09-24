@@ -22,6 +22,8 @@ cp .env.example .env
   "scripts": {
     "start": "node --env-file-if-exists=.env src/index.js",
     "dry-run": "DRY_RUN=true node --env-file-if-exists=.env src/index.js",
+    "dry-run:offline": "DRY_RUN=true OFFLINE=true node src/index.js",
+    "fixtures:update": "node scripts/update-fixtures.js",
     "test": "node --import ./test/setup.js --test 'test/**/*.test.js' '.cursor/hooks/*.test.mjs'",
     "lint": "eslint .",
     "typecheck": "tsc",
@@ -36,6 +38,8 @@ cp .env.example .env
 |---|---|
 | `npm run dry-run` | Збирає ціни з усіх джерел, порівнює і друкує пост у консоль. Нічого не публікує і не зберігає. Основний режим під час розробки. |
 | `SOURCES=okko npm run dry-run` | Те саме, але лише для одного джерела. |
+| `npm run dry-run:offline` | Те саме без мережі: відповіді сайтів беруться з `test/fixtures/` за `test/fixtures/manifest.json`. |
+| `npm run fixtures:update -- wog` | Завантажити свіжі відповіді сайтів у `test/fixtures/` (без аргументів — усі джерела з маніфесту). |
 | `npm start` | Повний запуск: публікація і збереження знімка. |
 | `npm test` | Запуск тестів. |
 | `npm run typecheck` | Перевірка типів за JSDoc-анотаціями (`tsc` з `checkJs`, без компіляції). |
@@ -66,19 +70,24 @@ cp .env.example .env
 | Нормалізація | Відомі назви → правильні коди; невідома назва → пропускається. |
 | Валідація | Ціни поза межами і різкі стрибки відсіюються. |
 | Порівняння | Подорожчання, здешевлення, без змін, новий вид пального, перший запуск без `previous`, пропущені дні, середні ціни. |
-| Форматер | Готовий текст поста для фіксованого набору даних (порівнюємо з очікуваним рядком). |
+| Форматер | Готовий текст поста для фіксованого набору даних (порівнюємо з очікуваним рядком — прикладом з [Формату поста](message-format.md)). |
+| Увесь ланцюжок | `test/e2e.test.js` проганяє `run()` в режимі dry-run з усіма зареєстрованими джерелами на фікстурах і порівнює пост з еталоном `test/golden/dry-run.txt`. |
 
-Коли сайт змінює верстку: зберегти нову версію сторінки у `test/fixtures/`, побачити, що тест падає, виправити парсер, тест знову зелений.
+Еталон оновлюється командою `UPDATE_GOLDEN=1 npm test`. Після цього обов'язково переглянути `git diff test/golden/`: еталон — це специфікація, і зміна в ньому має бути свідомою.
+
+Коли сайт змінює верстку: `npm run fixtures:update -- <id>`, побачити, що тест падає, виправити парсер, тест знову зелений. Покроково — у скілі `.cursor/skills/fix-broken-parser/`.
 
 ## Як додати нове джерело
 
+Агент Cursor робить це за скілами `research-source` (кроки 1–2) і `add-fuel-source` (решта).
+
 1. Дослідити сайт за інструкцією з [Джерела даних](sources.md#як-дослідити-сайт-перед-написанням-парсера).
-2. Зберегти відповідь сайту в `test/fixtures/<id>.html`.
-3. Створити `src/sources/<id>.js` за контрактом парсера.
-4. Додати назви пального в словник у `src/core/normalize.js`.
+2. Зберегти відповідь сайту в `test/fixtures/<id>.json` (або `.html`) і додати її URL та файл у `test/fixtures/manifest.json`.
+3. Створити `src/sources/<id>.js` за контрактом парсера (зразок — `src/sources/wog.js`).
+4. Додати назви пального в словник `FUEL_MAP` у `src/core/fuels.js`.
 5. Зареєструвати джерело в `src/sources/index.js`.
-6. Написати тест у `test/sources.test.js`.
-7. Перевірити: `SOURCES=<id> npm run dry-run`.
+6. Написати тест у `test/sources.test.js` і оновити еталон поста (`UPDATE_GOLDEN=1 npm test`).
+7. Перевірити: `npm run check`, потім `SOURCES=<id> npm run dry-run`.
 8. Оновити таблицю джерел у `docs/sources.md`.
 
 ## Стиль коду
