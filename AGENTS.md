@@ -2,7 +2,7 @@
 
 Telegram bot that once a day scrapes fuel prices from Ukrainian gas station chains (OKKO, WOG, UPG, SOCAR), compares them with the previous snapshot and posts the result to a Telegram channel. Runs as a one-shot Node.js script on a GitHub Actions schedule; snapshots are stored as JSON in `data/` and committed to the repo.
 
-**Status: one source.** WOG is implemented end to end (fetch → normalize → validate → post). Compare, the Telegram client, admin notices and the JSON store are still stubs; OKKO, UPG and SOCAR are researched (fuel maps ready) but not implemented. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
+**Status: one source.** WOG is implemented end to end (fetch → normalize → validate → post), and the Telegram client and admin notices are real. Compare and the JSON store are still stubs; OKKO, UPG and SOCAR are researched (fuel maps ready) but not implemented. Follow [docs/roadmap.md](docs/roadmap.md) for what to build next and tick its checkboxes when a step is done.
 
 ## Where to look
 

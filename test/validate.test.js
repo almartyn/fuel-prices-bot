@@ -37,7 +37,7 @@ test('drops sharp jumps against the previous snapshot of the same station', () =
   const { stations, rejected } = validate([wog({ a95: 92.9, diesel: 101.9, lpg: 45.5 })], previous, limits);
   assert.deepEqual(stations[0].prices, { diesel: 101.9, lpg: 45.5 });
   assert.deepEqual(rejected, [
-    { stationId: 'wog', code: 'a95', price: 92.9, previous: 56.69, reason: '+63.9% since previous 56.69' },
+    { stationId: 'wog', stationName: 'WOG', code: 'a95', price: 92.9, previous: 56.69, reason: '+63.9% since previous 56.69' },
   ]);
 });
 

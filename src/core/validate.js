@@ -24,7 +24,8 @@ export function validate(stations, previous, { priceMin, priceMax, maxDailyChang
     for (const [code, price] of Object.entries(station.prices)) {
       const before = Object.hasOwn(previousPrices, code) ? previousPrices[code] : null;
       /** @param {string} reason */
-      const reject = (reason) => rejected.push({ stationId: station.id, code, price, previous: before, reason });
+      const reject = (reason) =>
+        rejected.push({ stationId: station.id, stationName: station.name, code, price, previous: before, reason });
 
       if (!Number.isFinite(price) || price < priceMin || price > priceMax) {
         reject(`outside ${priceMin}–${priceMax} UAH`);

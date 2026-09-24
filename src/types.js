@@ -48,6 +48,7 @@
 /**
  * @typedef {object} RejectedPrice
  * @property {string} stationId
+ * @property {string} stationName
  * @property {string} code
  * @property {number} price
  * @property {number | null} previous

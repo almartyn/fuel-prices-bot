@@ -15,6 +15,7 @@ import { LOG_LEVELS } from './utils/logger.js';
  * @property {HttpSettings} http
  * @property {LogLevel} logLevel
  * @property {string} timeZone
+ * @property {string | null} runUrl  link to the GitHub Actions run, built from variables GitHub sets
  */
 
 export class ConfigError extends Error {
@@ -102,10 +103,17 @@ export function loadConfig(env = process.env) {
     },
     logLevel,
     timeZone,
+    runUrl: githubRunUrl(env),
   };
 
   if (problems.length) throw new ConfigError(problems.join('\n'));
   return deepFreeze(config);
+}
+
+/** @param {Record<string, string | undefined>} env */
+function githubRunUrl({ GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID }) {
+  if (!GITHUB_SERVER_URL || !GITHUB_REPOSITORY || !GITHUB_RUN_ID) return null;
+  return `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
 }
 
 /**

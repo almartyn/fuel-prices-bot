@@ -10,6 +10,7 @@ import { FUEL_CODES, FUEL_LABELS } from '../core/fuels.js';
  * @property {SourceError[]} errors
  * @property {RejectedPrice[]} rejected
  * @property {string[]} messages
+ * @property {string | null} runUrl  GitHub Actions run, when running there
  */
 
 export const TELEGRAM_MESSAGE_LIMIT = 4096;
@@ -62,24 +63,34 @@ export function formatPost({ comparison, errors, sources }) {
 }
 
 /**
- * Stub until roadmap stage 3: plain text without the run link.
+ * Technical notice for the admin chat (template: docs/error-handling.md). Unlike the post,
+ * an oversized notice is cut rather than rejected: it must get through.
  *
  * @param {AdminNotice} notice
  * @returns {string}
  */
-export function formatAdminNotice({ date, published, errors, rejected, messages }) {
-  const lines = [`🚨 fuel-prices-bot — ${date}`, '', `Опубліковано: ${published ? 'так' : 'ні'}`];
+export function formatAdminNotice({ date, published, errors, rejected, messages, runUrl }) {
+  const [y, m, d] = date.split('-');
+  const blocks = [[`🚨 fuel-prices-bot — ${d}.${m}.${y}`], [`Опубліковано: ${published ? 'так' : 'ні'}`]];
   if (errors.length) {
-    lines.push('Не спрацювали джерела:', ...errors.map(({ source, error }) => `• ${source.name}: ${error.message}`));
+    blocks.push(['Не спрацювали джерела:', ...errors.map(({ source, error }) => `• ${escapeHtml(source.name)}: ${escapeHtml(error.message)}`)]);
   }
   if (rejected.length) {
-    lines.push(
+    blocks.push([
       'Підозрілі ціни (пропущено):',
-      ...rejected.map((item) => `• ${item.stationId} ${item.code}: ${item.price} (${item.reason})`),
-    );
+      ...rejected.map((item) => {
+        const label = FUEL_LABELS[/** @type {FuelCode} */ (item.code)] ?? item.code;
+        return `• ${escapeHtml(item.stationName)} ${label}: ${item.price.toFixed(2)} (${escapeHtml(item.reason)})`;
+      }),
+    ]);
   }
-  lines.push(...messages.map((message) => `• ${message}`));
-  return lines.join('\n');
+  if (messages.length) {
+    blocks.push(['Інші проблеми:', ...messages.map((message) => `• ${escapeHtml(message)}`)]);
+  }
+  if (runUrl) blocks.push([`Лог: ${escapeHtml(runUrl)}`]);
+
+  const text = blocks.map((block) => block.join('\n')).join('\n\n');
+  return text.length > TELEGRAM_MESSAGE_LIMIT ? `${text.slice(0, TELEGRAM_MESSAGE_LIMIT - 1)}…` : text;
 }
 
 /**

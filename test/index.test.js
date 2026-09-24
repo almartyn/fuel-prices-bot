@@ -105,7 +105,7 @@ describe('run', () => {
     assert.deepEqual(saved[0].failedSources, ['upg']);
     assert.match(toChannel[0].text, /Не вдалося отримати дані: UPG/);
     assert.match(toAdmin[0].text, /UPG: no usable prices left/);
-    assert.match(toAdmin[0].text, /upg a95: 5\.69 \(outside 20–200 UAH\)/);
+    assert.match(toAdmin[0].text, /UPG А-95: 5\.69 \(outside 20–200 UAH\)/);
   });
 
   test('posts nothing and fails when every source fails', async () => {

@@ -93,7 +93,7 @@ export async function run({ config, log, sources, store, telegram, output, now =
   const notify = (published, extra = []) =>
     notifyAdmin(
       { config, log, telegram },
-      { date: today, published, errors, rejected, messages: [...messages, ...extra] },
+      { date: today, published, errors, rejected, messages: [...messages, ...extra], runUrl: config.runUrl },
     );
   const hasProblems = () => errors.length > 0 || rejected.length > 0 || messages.length > 0;
 
@@ -172,7 +172,7 @@ async function main() {
       log,
       sources,
       store: createJsonStore({ dir: 'data' }),
-      telegram: createTelegramClient({ botToken: config.telegram.botToken }),
+      telegram: createTelegramClient({ botToken: config.telegram.botToken, timeoutMs: config.http.timeoutMs }),
       output: (text) => process.stdout.write(`${text}\n`),
       fetch: config.offline ? createFixtureFetch(FIXTURES_DIR) : undefined,
     });

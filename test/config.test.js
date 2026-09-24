@@ -18,7 +18,18 @@ describe('loadConfig', () => {
       http: { timeoutMs: 20_000, retries: 3 },
       logLevel: 'info',
       timeZone: 'Europe/Kyiv',
+      runUrl: null,
     });
+  });
+
+  test('builds the GitHub Actions run link from variables GitHub sets', () => {
+    const config = loadConfig({
+      ...required,
+      GITHUB_SERVER_URL: 'https://github.com',
+      GITHUB_REPOSITORY: 'me/fuel-prices-bot',
+      GITHUB_RUN_ID: '123',
+    });
+    assert.equal(config.runUrl, 'https://github.com/me/fuel-prices-bot/actions/runs/123');
   });
 
   test('requires Telegram settings outside dry-run and reports all problems at once', () => {
