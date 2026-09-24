@@ -6,7 +6,7 @@ import { compare } from './core/compare.js';
 import { normalize } from './core/normalize.js';
 import { validate } from './core/validate.js';
 import { selectSources } from './sources/index.js';
-import { createJsonStore } from './storage/jsonStore.js';
+import { createJsonStore, SCHEMA_VERSION } from './storage/jsonStore.js';
 import { createTelegramClient } from './telegram/client.js';
 import { formatAdminNotice, formatPost } from './telegram/formatter.js';
 import { localDate } from './utils/date.js';
@@ -21,8 +21,7 @@ import { createLogger } from './utils/logger.js';
 /** @import { TelegramClient } from './telegram/client.js' */
 /** @import { AdminNotice } from './telegram/formatter.js' */
 
-export const SCHEMA_VERSION = 1;
-
+const DATA_DIR = fileURLToPath(new URL('../data/', import.meta.url));
 const FIXTURES_DIR = fileURLToPath(new URL('../test/fixtures/', import.meta.url));
 
 /**
@@ -64,9 +63,21 @@ export async function run({ config, log, sources, store, telegram, output, now =
     return 0;
   }
 
+  // A second run on the same day (FORCE, dry-run) must not diff today against itself.
+  let baseline = previous;
+  if (previous?.date === today) {
+    try {
+      baseline = await store.readBefore(today);
+    } catch (error) {
+      log.error(`Cannot read the snapshot before ${today}, comparing with nothing: ${errorMessage(error)}`);
+      messages.push(`Snapshot before ${today} is unreadable: ${errorMessage(error)}`);
+      baseline = null;
+    }
+  }
+
   const http = fetch ? { ...config.http, fetch } : config.http;
   const { results, errors } = await collectAll(sources, { http }, log);
-  const validated = validate(normalize(results, log), previous, config.validation);
+  const validated = validate(normalize(results, log), baseline, config.validation);
   const rejected = validated.rejected;
   const stations = [];
   for (const station of validated.stations) {
@@ -103,7 +114,7 @@ export async function run({ config, log, sources, store, telegram, output, now =
     return 1;
   }
 
-  const text = formatPost({ comparison: compare(previous, snapshot), errors, sources });
+  const text = formatPost({ comparison: compare(baseline, snapshot), errors, sources });
 
   if (config.dryRun) {
     output(text);
@@ -171,7 +182,7 @@ async function main() {
       config,
       log,
       sources,
-      store: createJsonStore({ dir: 'data' }),
+      store: createJsonStore({ dir: DATA_DIR }),
       telegram: createTelegramClient({ botToken: config.telegram.botToken, timeoutMs: config.http.timeoutMs }),
       output: (text) => process.stdout.write(`${text}\n`),
       fetch: config.offline ? createFixtureFetch(FIXTURES_DIR) : undefined,

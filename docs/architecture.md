@@ -133,15 +133,19 @@ if (!config.force && !config.dryRun && previous?.postedDate === today()) {
   return;
 }
 
+// Повторний запуск того ж дня (FORCE, dry-run) порівнюємо не з сьогоднішнім знімком,
+// а з останнім знімком до сьогодні з history/.
+const baseline = previous?.date === today() ? await store.readBefore(today()) : previous;
+
 const { results, errors } = await collectAll(sources);
-const snapshot = validate(normalize(results));
+const snapshot = validate(normalize(results), baseline);
 
 if (snapshot.stations.length === 0) {
   await notifyAdmin('Жодне джерело не повернуло цін', errors);
   process.exit(1);
 }
 
-const diff = compare(previous, snapshot);
+const diff = compare(baseline, snapshot);
 const text = formatPost(diff, errors);
 
 if (config.dryRun) {

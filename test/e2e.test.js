@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
+import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
 import { run } from '../src/index.js';
 import { allSources } from '../src/sources/index.js';
+import { createJsonStore } from '../src/storage/jsonStore.js';
 import { createFixtureFetch } from '../src/utils/fixtureFetch.js';
 import { fakeLogger, fakeStore, fakeTelegram, testConfig } from './helpers/fakes.js';
 import { assertGolden } from './helpers/golden.js';
@@ -31,6 +35,28 @@ test('offline dry-run of every registered source produces the golden post', asyn
     'fixtures should parse without warnings',
   );
   await assertGolden('dry-run.txt', `${printed[0]}\n`);
+});
+
+test('two daily runs on the JSON store: the second post compares with the first', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'fuel-prices-bot-e2e-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const store = createJsonStore({ dir });
+  const { telegram, sent } = fakeTelegram();
+  /** @param {string} iso */
+  const runAt = (iso) =>
+    run({ config: testConfig(), log: fakeLogger().log, sources: [...allSources], store, telegram, output: () => {}, now: () => new Date(iso), fetch: fixtureFetch });
+
+  assert.equal(await runAt('2026-09-23T06:00:00Z'), 0);
+  assert.equal(await runAt('2026-09-23T09:00:00Z'), 0, 'same day: skipped');
+  assert.equal(await runAt('2026-09-24T06:00:00Z'), 0);
+
+  const posts = sent.filter(({ chatId }) => chatId === '@test_channel').map(({ text }) => text);
+  assert.equal(posts.length, 2);
+  assert.doesNotMatch(posts[0], /Зміни відносно/);
+  assert.match(posts[1], /<i>Зміни відносно 23 вересня<\/i>/);
+  assert.match(posts[1], /<code>А-95 +\d+\.\d\d =<\/code>/);
+  assert.deepEqual((await readdir(path.join(dir, 'history'))).sort(), ['2026-09-23.json', '2026-09-24.json']);
+  assert.equal((await store.readLatest())?.postedDate, '2026-09-24');
 });
 
 test('the fixture fetch refuses URLs missing from the manifest', async () => {

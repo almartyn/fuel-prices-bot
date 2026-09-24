@@ -16,6 +16,15 @@ const broken = fakeSource('upg', new Error('HTTP 503 (3 attempts)'));
 
 /** @type {Snapshot} */
 const postedToday = { schemaVersion: 1, date: KYIV_TODAY, collectedAt: '', postedDate: KYIV_TODAY, stations: [], failedSources: [] };
+/** @type {Snapshot} */
+const postedYesterday = {
+  schemaVersion: 1,
+  date: '2026-09-23',
+  collectedAt: '',
+  postedDate: '2026-09-23',
+  stations: [{ id: 'wog', name: 'WOG', prices: { a95: 92.6 } }],
+  failedSources: [],
+};
 
 /**
  * @param {object} [options]
@@ -82,6 +91,29 @@ describe('run', () => {
   test('FORCE posts again on the same day', async () => {
     const { events } = await runWith({ env: { FORCE: 'true' }, store: { previous: postedToday } });
     assert.deepEqual(events, ['send:@test_channel', 'save']);
+  });
+
+  test('marks changes against the previous snapshot', async () => {
+    const { toChannel } = await runWith({ store: { previous: postedYesterday } });
+    assert.match(toChannel[0].text, /<i>Зміни відносно 23 вересня<\/i>/);
+    assert.ok(toChannel[0].text.includes('<b>WOG</b>\n<code>А-95   92.90 ▲0.30</code>'), toChannel[0].text);
+    assert.ok(toChannel[0].text.includes('<b>Середні ціни</b>\n<code>А-95   92.90 ▲0.30</code>'), toChannel[0].text);
+  });
+
+  test('a second run on the same day compares with the snapshot before today', async () => {
+    const today = { ...postedToday, stations: [{ id: 'wog', name: 'WOG', prices: { a95: 92.9 } }] };
+    const { toChannel } = await runWith({ env: { FORCE: 'true' }, store: { previous: today, before: postedYesterday } });
+    assert.match(toChannel[0].text, /Зміни відносно 23 вересня/);
+    assert.match(toChannel[0].text, /92\.90 ▲0\.30/);
+  });
+
+  test('an unreadable snapshot before today is reported and not compared with', async () => {
+    const { toChannel, toAdmin } = await runWith({
+      env: { FORCE: 'true' },
+      store: { previous: postedToday, before: new Error('history/2026-09-23.json: invalid JSON') },
+    });
+    assert.doesNotMatch(toChannel[0].text, /Зміни відносно/);
+    assert.match(toAdmin[0].text, /Snapshot before 2026-09-24 is unreadable/);
   });
 
   test('dry-run is not blocked by an earlier post today', async () => {

@@ -39,10 +39,11 @@ export function fakeSource(id, result) {
 }
 
 /**
- * @param {{ previous?: Snapshot | null | Error, saveError?: Error }} [options]
+ * @param {{ previous?: Snapshot | null | Error, before?: Snapshot | null | Error, saveError?: Error }} [options]
+ *   `previous` answers readLatest, `before` answers readBefore
  * @param {string[]} [events]  shared call log to check ordering
  */
-export function fakeStore({ previous = null, saveError } = {}, events = []) {
+export function fakeStore({ previous = null, before = null, saveError } = {}, events = []) {
   /** @type {Snapshot[]} */
   const saved = [];
   /** @type {SnapshotStore} */
@@ -50,6 +51,10 @@ export function fakeStore({ previous = null, saveError } = {}, events = []) {
     async readLatest() {
       if (previous instanceof Error) throw previous;
       return previous;
+    },
+    async readBefore() {
+      if (before instanceof Error) throw before;
+      return before;
     },
     async save(snapshot) {
       events.push('save');
