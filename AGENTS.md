@@ -53,7 +53,7 @@ Do not break these without explicitly discussing it first:
 
 ## Safety
 
-- Never read `.env` or print the bot token. A hook blocks reading `.env`.
+- Never read `.env` or print the bot token. A hook blocks reading `.env`. The sandbox also hides it from processes, so `npm run dry-run` inside it runs without `.env` (fine); a real publish has to run outside the sandbox, with the user's approval.
 - Never publish to Telegram from the agent: use `DRY_RUN=true`. `npm start`, `node src/index.js` without `DRY_RUN=true`, requests to `api.telegram.org` and `git push` require the user's approval (enforced by hooks in `.cursor/hooks/`).
 - Tests never hit real sites or Telegram. Live requests are allowed only while researching a source.
 - Respect the sites: one request per source per run, realistic `User-Agent`, check `robots.txt`.
