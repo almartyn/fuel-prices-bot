@@ -9,75 +9,27 @@
 
 ## Workflow
 
-Файл `.github/workflows/daily-post.yml`:
+Файл [`.github/workflows/daily-post.yml`](../.github/workflows/daily-post.yml). Що в ньому:
 
-```yaml
-name: Daily fuel prices
+- **Тригери:** розклад `17 6 * * *` (UTC) і ручний запуск з вкладки Actions (`workflow_dispatch`) з двома галочками: `dry_run` — лише показати пост у лозі, `force` — опублікувати повторно того ж дня.
+- **`permissions: contents: write`** — щоб закомітити `data/`.
+- **`concurrency: daily-post`** без скасування — два запуски не йдуть паралельно, другий чекає першого, а потім пропускається завдяки `postedDate`. Для цього `actions/checkout` отримує `ref: ${{ github.ref_name }}`: без нього він бере коміт, на якому запуск було створено, і другий запуск не побачив би знімка, закоміченого першим.
+- **Кроки:** `actions/checkout@v7`, `actions/setup-node@v7` з `node-version-file: .nvmrc`, `npm ci`, `node src/index.js`.
+- **Змінні для скрипта:** `TELEGRAM_BOT_TOKEN` і `TELEGRAM_ADMIN_CHAT_ID` із Secrets, `TELEGRAM_CHANNEL_ID` із Variables (див. [Конфігурація](configuration.md#github-actions)), `DRY_RUN` і `FORCE` з галочок ручного запуску (за розкладом — `false`).
+- **Коміт знімка** виконується навіть після невдалого кроку публікації (але не в dry-run і не при скасуванні). Скрипт зберігає знімок лише після успішної публікації, тож якщо файли в `data/` змінилися, пост уже вийшов — і знімок мусить потрапити в репозиторій, інакше наступний запуск не знатиме, що сьогодні вже публікували. Якщо змін немає, крок нічого не робить. Перед `git push` робиться `git pull --rebase`, щоб не впасти, якщо в гілку тим часом щось запушили.
 
-on:
-  schedule:
-    - cron: '0 6 * * *'     # 06:00 UTC = 09:00 за Києвом влітку, 08:00 взимку
-  workflow_dispatch:         # ручний запуск з вкладки Actions
-    inputs:
-      dry_run:
-        description: 'Лише показати пост, не публікувати'
-        type: boolean
-        default: false
-      force:
-        description: 'Опублікувати, навіть якщо сьогодні вже публікували'
-        type: boolean
-        default: false
-
-permissions:
-  contents: write            # щоб закомітити data/
-
-concurrency:
-  group: daily-post
-  cancel-in-progress: false  # не запускати два пости паралельно
-
-jobs:
-  post:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - run: npm ci
-
-      - name: Collect prices and post
-        run: node src/index.js
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
-          TELEGRAM_CHANNEL_ID: ${{ vars.TELEGRAM_CHANNEL_ID }}
-          DRY_RUN: ${{ inputs.dry_run || 'false' }}
-          FORCE: ${{ inputs.force || 'false' }}
-
-      - name: Commit snapshot
-        if: success() && inputs.dry_run != true
-        run: |
-          git config user.name  "fuel-prices-bot"
-          git config user.email "fuel-prices-bot@users.noreply.github.com"
-          git add data/
-          git diff --staged --quiet || git commit -m "data: prices for $(TZ=Europe/Kyiv date +%F)"
-          git push
-```
+Коміти від `GITHUB_TOKEN` не запускають інші workflows, тож щоденний коміт знімка не запускає CI.
 
 Версії actions актуальні на вересень 2026 (`@v7`), Node.js береться з `.nvmrc`. Надалі оновлення actions пропонує Dependabot (`.github/dependabot.yml`).
 
 ## Розклад і часові пояси
 
 - Cron у GitHub Actions працює **лише в UTC**.
-- Україна переходить на літній час: влітку UTC+3, взимку UTC+2. Тому `0 6 * * *` означає 09:00 влітку і 08:00 взимку.
+- Україна переходить на літній час: влітку UTC+3, взимку UTC+2. Тому `17 6 * * *` означає 09:17 влітку і 08:17 взимку.
 - Якщо потрібен стабільно один і той самий київський час, є два варіанти:
   1. Два розклади (`0 6 * * *` і `0 7 * * *`), а скрипт сам перевіряє, чи зараз потрібна київська година, і лишній запуск завершується без дій.
   2. Змиритися з різницею в годину — для щоденного поста зазвичай некритично.
-- **Запуски за розкладом можуть запізнюватися** на 5–30 хвилин у години пікового навантаження GitHub. Не ставимо розклад рівно на `:00`, краще, наприклад, `17 6 * * *` — у «круглі» хвилини черга найбільша.
+- **Запуски за розкладом можуть запізнюватися** на 5–30 хвилин у години пікового навантаження GitHub. Тому розклад не рівно на `:00`, а на `:17` — у «круглі» хвилини черга найбільша.
 
 ## Захист від повторної публікації
 

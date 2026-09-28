@@ -1,0 +1,67 @@
+name: Daily fuel prices
+
+on:
+  schedule:
+    # Cron is UTC only: 09:17 in Kyiv in summer, 08:17 in winter. Off the round hour,
+    # when the scheduler queue is shortest.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Лише показати пост у лозі, не публікувати і не зберігати'
+        type: boolean
+        default: false
+      force:
+        description: 'Опублікувати, навіть якщо сьогодні вже публікували'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # The branch tip, not the commit the run was queued at: a run that waited for another
+      # must see the snapshot it committed, or it would post a second time.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Collect prices and post
+        run: node src/index.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          TELEGRAM_CHANNEL_ID: ${{ vars.TELEGRAM_CHANNEL_ID }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          FORCE: ${{ inputs.force && 'true' || 'false' }}
+
+      # Runs even when the previous step failed: a snapshot saved after a publish must be
+      # committed, or the next run would not know today was posted.
+      - name: Commit snapshot
+        if: ${{ !cancelled() && !inputs.dry_run }}
+        run: |
+          if [ -z "$(git status --porcelain -- data)" ]; then
+            echo "No snapshot changes to commit"
+            exit 0
+          fi
+          git config user.name "fuel-prices-bot"
+          git config user.email "fuel-prices-bot@users.noreply.github.com"
+          git add data
+          git commit -m "data: prices for $(TZ=Europe/Kyiv date +%F)"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
