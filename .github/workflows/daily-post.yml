@@ -1,10 +1,13 @@
 name: Daily fuel prices
 
 on:
+  # Cron is UTC only: 09:17 in Kyiv in summer, 08:17 in winter. GitHub delays scheduled
+  # runs by hours or drops them under load, so the later slots are backups: the first run
+  # that gets through posts, the rest see today's postedDate and exit.
   schedule:
-    # Cron is UTC only: 09:17 in Kyiv in summer, 08:17 in winter. Off the round hour,
-    # when the scheduler queue is shortest.
     - cron: '17 6 * * *'
+    - cron: '47 6 * * *'
+    - cron: '47 7 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
