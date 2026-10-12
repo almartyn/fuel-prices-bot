@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-11",
-  "collectedAt": "2026-10-11T12:54:24.447Z",
-  "postedDate": "2026-10-11",
+  "date": "2026-10-12",
+  "collectedAt": "2026-10-12T15:31:28.282Z",
+  "postedDate": "2026-10-12",
   "stations": [
     {
       "id": "okko",
@@ -44,10 +44,10 @@
       "id": "socar",
       "name": "SOCAR",
       "prices": {
-        "a100": 105,
-        "diesel_premium": 105,
-        "a95_premium": 98.9,
-        "a95": 95.9,
+        "a100": 104,
+        "diesel_premium": 104,
+        "a95_premium": 97.9,
+        "a95": 94.9,
         "lpg": 48.9
       }
     }
