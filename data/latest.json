@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-13",
-  "collectedAt": "2026-10-13T14:15:43.824Z",
-  "postedDate": "2026-10-13",
+  "date": "2026-10-14",
+  "collectedAt": "2026-10-14T11:56:59.186Z",
+  "postedDate": "2026-10-14",
   "stations": [
     {
       "id": "okko",
@@ -20,8 +20,8 @@
       "id": "wog",
       "name": "WOG",
       "prices": {
-        "diesel": 99.9,
-        "diesel_premium": 102.9,
+        "diesel": 100.9,
+        "diesel_premium": 103.9,
         "a95": 92.9,
         "a95_premium": 95.9,
         "a100": 102.9,
@@ -45,7 +45,7 @@
       "name": "SOCAR",
       "prices": {
         "a100": 104,
-        "diesel_premium": 104,
+        "diesel_premium": 105,
         "a95_premium": 97.9,
         "a95": 94.9,
         "lpg": 48.9
