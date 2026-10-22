@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-21",
-  "collectedAt": "2026-10-21T11:53:42.199Z",
-  "postedDate": "2026-10-21",
+  "date": "2026-10-22",
+  "collectedAt": "2026-10-22T11:56:53.558Z",
+  "postedDate": "2026-10-22",
   "stations": [
     {
       "id": "okko",
@@ -13,29 +13,29 @@
         "diesel": 105.9,
         "a95_premium": 95.9,
         "a95": 92.9,
-        "lpg": 52.9
+        "lpg": 53.9
       }
     },
     {
       "id": "wog",
       "name": "WOG",
       "prices": {
-        "diesel": 105.5,
-        "diesel_premium": 108.5,
+        "diesel": 105.9,
+        "diesel_premium": 108.9,
         "a95": 92.9,
         "a95_premium": 95.9,
         "a100": 102.9,
-        "lpg": 53.5
+        "lpg": 55
       }
     },
     {
       "id": "upg",
       "name": "UPG",
       "prices": {
-        "diesel_premium": 103.9,
+        "diesel_premium": 104.9,
         "a95": 89.9,
-        "lpg": 51.9,
-        "diesel": 101.9,
+        "lpg": 52.9,
+        "diesel": 102.9,
         "a100": 100.9,
         "a95_premium": 92.9
       }
@@ -48,7 +48,7 @@
         "diesel_premium": 109,
         "a95_premium": 97.9,
         "a95": 94.9,
-        "lpg": 54.4
+        "lpg": 54.5
       }
     }
   ],
