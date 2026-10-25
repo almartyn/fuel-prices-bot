@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-24",
-  "collectedAt": "2026-10-24T11:05:37.278Z",
-  "postedDate": "2026-10-24",
+  "date": "2026-10-25",
+  "collectedAt": "2026-10-25T11:35:10.264Z",
+  "postedDate": "2026-10-25",
   "stations": [
     {
       "id": "okko",
@@ -48,7 +48,7 @@
         "diesel_premium": 109,
         "a95_premium": 97.9,
         "a95": 94.9,
-        "lpg": 54.9
+        "lpg": 56.5
       }
     }
   ],
