@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-27",
-  "collectedAt": "2026-10-27T12:16:24.982Z",
-  "postedDate": "2026-10-27",
+  "date": "2026-10-28",
+  "collectedAt": "2026-10-28T12:59:35.857Z",
+  "postedDate": "2026-10-28",
   "stations": [
     {
       "id": "okko",
@@ -25,7 +25,7 @@
         "a95": 92.9,
         "a95_premium": 95.9,
         "a100": 102.9,
-        "lpg": 57.9
+        "lpg": 58.9
       }
     },
     {
@@ -34,7 +34,7 @@
       "prices": {
         "diesel_premium": 104.9,
         "a95": 89.9,
-        "lpg": 54.9,
+        "lpg": 55.9,
         "diesel": 102.9,
         "a100": 100.9,
         "a95_premium": 92.9
@@ -48,7 +48,7 @@
         "diesel_premium": 111,
         "a95_premium": 98.9,
         "a95": 95.9,
-        "lpg": 56.5
+        "lpg": 57.5
       }
     }
   ],
