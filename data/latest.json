@@ -1,9 +1,21 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-31",
-  "collectedAt": "2026-10-31T12:36:44.794Z",
-  "postedDate": "2026-10-31",
+  "date": "2026-11-01",
+  "collectedAt": "2026-11-01T13:29:16.768Z",
+  "postedDate": "2026-11-01",
   "stations": [
+    {
+      "id": "okko",
+      "name": "OKKO",
+      "prices": {
+        "a100": 102.9,
+        "diesel_premium": 109.9,
+        "diesel": 106.9,
+        "a95_premium": 95.9,
+        "a95": 92.9,
+        "lpg": 59.9
+      }
+    },
     {
       "id": "upg",
       "name": "UPG",
@@ -29,7 +41,6 @@
     }
   ],
   "failedSources": [
-    "okko",
     "wog"
   ]
 }
