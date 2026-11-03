@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "date": "2026-11-02",
-  "collectedAt": "2026-11-02T15:59:54.933Z",
-  "postedDate": "2026-11-02",
+  "date": "2026-11-03",
+  "collectedAt": "2026-11-03T14:19:58.034Z",
+  "postedDate": "2026-11-03",
   "stations": [
     {
       "id": "okko",
@@ -22,7 +22,7 @@
       "prices": {
         "diesel_premium": 105.9,
         "a95": 89.9,
-        "lpg": 57.9,
+        "lpg": 58.9,
         "diesel": 102.9,
         "a100": 100.9,
         "a95_premium": 92.9
