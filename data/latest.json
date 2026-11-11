@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "date": "2026-11-10",
-  "collectedAt": "2026-11-10T14:56:19.552Z",
-  "postedDate": "2026-11-10",
+  "date": "2026-11-11",
+  "collectedAt": "2026-11-11T14:26:48.325Z",
+  "postedDate": "2026-11-11",
   "stations": [
     {
       "id": "okko",
       "name": "OKKO",
       "prices": {
-        "a100": 102.9,
+        "a100": 101.9,
         "diesel_premium": 109.9,
         "diesel": 106.9,
-        "a95_premium": 95.9,
-        "a95": 92.9,
-        "lpg": 61.9
+        "a95_premium": 94.9,
+        "a95": 91.9,
+        "lpg": 62.9
       }
     },
     {
       "id": "upg",
       "name": "UPG",
       "prices": {
-        "diesel_premium": 105.9,
+        "diesel_premium": 105.32,
         "a95": 87.9,
         "lpg": 60.9,
-        "diesel": 102.9,
+        "diesel": 102.55,
         "a100": 98.9,
         "a95_premium": 90.9
       }
