@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-26",
+  "collectedAt": "2026-11-26T16:57:26.406Z",
+  "postedDate": "2026-11-26",
+  "stations": [
+    {
+      "id": "okko",
+      "name": "OKKO",
+      "prices": {
+        "a100": 94.9,
+        "diesel_premium": 102.9,
+        "diesel": 99.9,
+        "a95_premium": 87.9,
+        "a95": 84.9,
+        "lpg": 62.9
+      }
+    },
+    {
+      "id": "upg",
+      "name": "UPG",
+      "prices": {
+        "diesel_premium": 97.9,
+        "a95": 80.9,
+        "lpg": 60.9,
+        "diesel": 93.86,
+        "a100": 93.9,
+        "a95_premium": 82.9
+      }
+    },
+    {
+      "id": "socar",
+      "name": "SOCAR",
+      "prices": {
+        "a100": 95.9,
+        "diesel_premium": 104,
+        "a95_premium": 88.9,
+        "a95": 85.9,
+        "lpg": 63.5
+      }
+    }
+  ],
+  "failedSources": [
+    "wog"
+  ]
+}
